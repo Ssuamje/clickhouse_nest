@@ -1,0 +1,27 @@
+services:
+  ch_server:
+    image: yandex/clickhouse-server
+    platform: linux/amd64
+    ports:
+      - "8123:8123"
+    volumes:
+      - ./db:/var/lib/clickhouse
+    networks:
+      - ch_ntw
+
+  ch_client:
+    image: yandex/clickhouse-client
+    platform: linux/amd64
+    entrypoint:
+      - /bin/sleep
+    command:
+      - infinity
+    networks:
+      - ch_ntw
+
+networks:
+  ch_ntw:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.222.1.0/24
