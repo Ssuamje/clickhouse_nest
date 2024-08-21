@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClickHouseClient } from '@clickhouse/client';
+import { Table, TableEntities } from './clickhouse.types';
 
 @Injectable()
 export class ClickhouseService {
@@ -7,11 +8,16 @@ export class ClickhouseService {
     @Inject(ClickHouseClient) private readonly client: ClickHouseClient,
   ) {}
 
-  async query() {
-    const result = await this.client.query({
-      query: 'SELECT * FROM system.numbers LIMIT 10',
+  async insert<T extends Table>(table: T, values: TableEntities[T][]) {
+    await this.client.insert({
+      table,
+      values,
       format: 'JSONEachRow',
     });
-    return await result.json();
+  }
+
+  async query<T>(query: string): Promise<T[]> {
+    const result = await this.client.query({ query, format: 'JSONEachRow' });
+    return await result.json<T>();
   }
 }
